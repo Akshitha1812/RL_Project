@@ -2,8 +2,8 @@
 
 > A reproduction of DeepSeek-R1's reinforcement learning pipeline at sub-3B scale using open-source tools, public datasets, and a single GPU.
 
-** Presentation Video:** https://youtu.be/YKj9yAINXSE 
-** Model Weights (Google Drive):** https://drive.google.com/drive/folders/117hnUye-XuguR5YWbVxcYPJzk4VaL8Dz?usp=sharing
+**Presentation Video:** https://youtu.be/YKj9yAINXSE 
+**Model Weights (Google Drive):** https://drive.google.com/drive/folders/117hnUye-XuguR5YWbVxcYPJzk4VaL8Dz?usp=sharing
 
 ---
 
