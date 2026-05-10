@@ -2,9 +2,8 @@
 
 > A reproduction of DeepSeek-R1's reinforcement learning pipeline at sub-3B scale using open-source tools, public datasets, and a single GPU.
 
-**📊 Slide Deck:** [ Insert Slide Link Here ]  
 **🎥 Presentation Video:** [ Insert Video Link Here ]  
-**🤗 Model Weights (Google Drive):** [ Insert Drive Link Here ]
+**🤗 Model Weights (Google Drive):** https://drive.google.com/drive/folders/117hnUye-XuguR5YWbVxcYPJzk4VaL8Dz?usp=sharing
 
 ---
 
@@ -35,10 +34,10 @@ This project investigates whether the GRPO (Group Relative Policy Optimization) 
 ```
 RL_Project/
 │
-├── 1_sft_training.ipynb          # Stage 1: Supervised Fine-Tuning on NuminaMath-CoT
-├── 2_grpo_training.ipynb         # Stage 2: GRPO RL Training on GSM8K
-├── 3_grpo_checkpoint_testing.ipynb  # Evaluate saved checkpoints on GSM8K test set
-├── 4_reasoning_quality_check.ipynb  # Qualitative analysis of model outputs per stage
+├── 1_qwen2_5_sft_training.ipynb          # Stage 1: Supervised Fine-Tuning on NuminaMath-CoT
+├── 2_grpo_train.ipynb         # Stage 2: GRPO RL Training on GSM8K
+├── 3_grpo_test.ipynb  # Evaluate saved checkpoints on GSM8K test set
+├── 4_reasoning_quality.ipynb  # Qualitative analysis of model outputs per stage
 │
 └── README.md                     # This file
 ```
@@ -49,7 +48,7 @@ RL_Project/
 
 ## File Descriptions
 
-### `1_sft_training.ipynb` — SFT Warm-up
+### `1__qwen2_5_sft_training.ipynb` — SFT Warm-up
 Supervised fine-tuning of Qwen2.5-1.5B on NuminaMath-CoT chain-of-thought examples. This stage teaches the model the `<think>...</think>` output format and stabilises generation before RL training begins. Without this step, the base model produces incoherent outputs and GRPO receives near-zero reward signal with no gradient to learn from.
 
 **Key parameters:**
@@ -65,7 +64,7 @@ Supervised fine-tuning of Qwen2.5-1.5B on NuminaMath-CoT chain-of-thought exampl
 
 ---
 
-### `2_grpo_training.ipynb` — GRPO Training
+### `2_grpo_train.ipynb` — GRPO Training
 Implements Group Relative Policy Optimisation using TRL's `GRPOTrainer`. For each prompt, G completions are sampled, scored with a combined reward function, and the policy is updated to favour higher-advantage completions subject to a KL divergence penalty from the SFT checkpoint.
 
 **Reward function:**
@@ -83,7 +82,7 @@ Implements Group Relative Policy Optimisation using TRL's `GRPOTrainer`. For eac
 **Fixed parameters across all configs:**
 | Parameter | Value | Reason |
 |---|---|---|
-| GRPO samples | 500 (GSM8K train) | G×completions×256tok approaches T4 memory ceiling |
+| GRPO samples | 500 (GSM8K train) | G×completions×256 tok approaches T4 memory ceiling |
 | Batch / GradAcc | 4 / 8 (eff. 32) | Stable gradients within memory budget |
 | Max prompt length | 256 tokens | Covers all GSM8K problem statements |
 | LR scheduler | Cosine + 5% warmup | Fixed to isolate LR magnitude in ablation |
@@ -92,12 +91,12 @@ Implements Group Relative Policy Optimisation using TRL's `GRPOTrainer`. For eac
 
 ---
 
-### `3_grpo_checkpoint_testing.ipynb` — Checkpoint Evaluation
-Loads saved LoRA checkpoints from each GRPO epoch and evaluates accuracy on a 50-sample probe of the GSM8K test set using exact answer match. Run this notebook to reproduce the per-epoch accuracy numbers reported in the paper (44/48, 54/60/44, 52/55/54 for Configs A, B, C respectively).
+### `3_grpo_test.ipynb` — Checkpoint Evaluation
+Loads saved LoRA checkpoints from each GRPO epoch and evaluates accuracy on a 50-sample probe of the GSM8K test set using exact answer match. Run this notebook to reproduce the per-epoch accuracy numbers reported.
 
 ---
 
-### `4_reasoning_quality_check.ipynb` — Reasoning Quality Analysis
+### `4_reasoning_quality.ipynb` — Reasoning Quality Analysis
 Qualitative comparison of model outputs across the three training stages (baseline, post-SFT, post-GRPO). Loads each checkpoint and generates completions for the same set of GSM8K problems, allowing side-by-side inspection of reasoning quality — structure, arithmetic correctness, constraint application, and use of `<think>` tags.
 
 ---
@@ -120,14 +119,14 @@ Or simply open the notebooks in **Google Colab** — all dependencies are instal
 
 **Step 1 — SFT Warm-up**
 ```
-Open 1_sft_training.ipynb in Colab (T4 GPU)
+Open 1__qwen2_5_sft_training.ipynb in Colab (T4 GPU)
 Run all cells top to bottom
 Checkpoint saved to: /content/sft_output/ (or upload to Drive)
 ```
 
 **Step 2 — GRPO Training**
 ```
-Open 2_grpo_training.ipynb in Colab (T4 GPU) or RunPod
+Open 2_grpo_trai.ipynb in Colab (T4 GPU) or RunPod
 Set config parameters at the top of the notebook (G, max_gen_tokens, kl_beta, lr)
 Load the SFT checkpoint path
 Run all cells
@@ -136,14 +135,14 @@ Checkpoints saved per epoch
 
 **Step 3 — Checkpoint Evaluation**
 ```
-Open 3_grpo_checkpoint_testing.ipynb
+Open 3_grpo_test.ipynb
 Point checkpoint_paths to your saved GRPO epoch directories
 Run all cells — outputs per-epoch GSM8K accuracy
 ```
 
 **Step 4 — Reasoning Quality Check**
 ```
-Open 4_reasoning_quality_check.ipynb
+Open 4_reasoning_quality.ipynb
 Load baseline, SFT, and GRPO checkpoint paths
 Run all cells — generates side-by-side output comparison
 ```
@@ -156,23 +155,8 @@ To skip training entirely and reproduce evaluation results, download the checkpo
 ## Key Findings
 
 1. **GRPO unlocks reasoning beyond SFT.** Every GRPO configuration surpassed the SFT ceiling of 28% within epoch 1. The 8→28→60% trajectory reflects a phase transition — SFT teaches format, GRPO teaches reasoning.
-
-2. **Learning rate matters more than KL for peak accuracy.** Dropping LR from 5e-6 to 1e-6 gave a +12pp accuracy jump. Tune learning rate before KL.
-
-3. **The exploration-stability tradeoff is empirically measurable.** KL=0.01 with G=2 peaks at 60% but collapses at epoch 3 (reward hacking). KL=0.1 with G=4 is stable across all epochs at 52–55%. The right choice depends on whether peak performance or training stability is the priority.
-
----
-
-## Dependencies
-
-| Library | Version |
-|---|---|
-| PyTorch | 2.3.0 + CUDA 12.1 |
-| Transformers | 4.46.3 |
-| TRL | 0.15.1 (SFT: 0.12.1) |
-| PEFT | 0.13.2 |
-| BitsAndBytes | 0.43.3 |
-| Datasets | 3.1.0 |
+   
+2. **The exploration-stability tradeoff is empirically measurable.** KL=0.01 with G=2 peaks at 60% but collapses at epoch 3 (reward hacking). KL=0.1 with G=4 is stable across all epochs at 52–55%. The right choice depends on whether peak performance or training stability is the priority.
 
 ---
 
