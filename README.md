@@ -15,7 +15,7 @@ This project investigates whether the GRPO (Group Relative Policy Optimization) 
 **Model:** Qwen2.5-1.5B  
 **Datasets:** NuminaMath-CoT (SFT) · GSM8K (GRPO + Eval)  
 **Hardware:** Google Colab T4 GPU (15 GB VRAM) · RunPod (Config C)  
-**Benchmark:** GSM8K Test Set — Exact Answer Match
+**Benchmark:** GSM8K Test Set - Exact Answer Match
 
 ### Results Summary
 
