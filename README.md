@@ -2,14 +2,14 @@
 
 > A reproduction of DeepSeek-R1's reinforcement learning pipeline at sub-3B scale using open-source tools, public datasets, and a single GPU.
 
-**🎥 Presentation Video:** https://youtu.be/YKj9yAINXSE 
-**🤗 Model Weights (Google Drive):** https://drive.google.com/drive/folders/117hnUye-XuguR5YWbVxcYPJzk4VaL8Dz?usp=sharing
+** Presentation Video:** https://youtu.be/YKj9yAINXSE 
+** Model Weights (Google Drive):** https://drive.google.com/drive/folders/117hnUye-XuguR5YWbVxcYPJzk4VaL8Dz?usp=sharing
 
 ---
 
 ## Overview
 
-This project investigates whether the GRPO (Group Relative Policy Optimization) post-training paradigm from DeepSeek-R1 can be reproduced at small scale - under 3B parameters - using only free-tier hardware and open-source datasets.
+This project investigates whether the GRPO (Group Relative Policy Optimization) post-training paradigm from DeepSeek-R1 can be reproduced at a small scale - under 3B parameters - using only free-tier hardware and open-source datasets.
 
 **Pipeline:** Baseline → SFT Warm-up → GRPO Training → Evaluation  
 **Model:** Qwen2.5-1.5B  
