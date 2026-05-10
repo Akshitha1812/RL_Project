@@ -9,7 +9,7 @@
 
 ## Overview
 
-This project investigates whether the GRPO (Group Relative Policy Optimization) post-training paradigm from DeepSeek-R1 can be reproduced at small scale — under 3B parameters — using only free-tier hardware and open-source datasets.
+This project investigates whether the GRPO (Group Relative Policy Optimization) post-training paradigm from DeepSeek-R1 can be reproduced at small scale - under 3B parameters - using only free-tier hardware and open-source datasets.
 
 **Pipeline:** Baseline → SFT Warm-up → GRPO Training → Evaluation  
 **Model:** Qwen2.5-1.5B  
@@ -42,13 +42,13 @@ RL_Project/
 └── README.md                     # This file
 ```
 
-> **Note:** Model weights and LoRA adapter checkpoints are too large for GitHub. All checkpoints are stored in Google Drive — see the link at the top of this README.
+> **Note:** Model weights and LoRA adapter checkpoints are too large for GitHub. All checkpoints are stored in Google Drive - see the link at the top of this README.
 
 ---
 
 ## File Descriptions
 
-### `1__qwen2_5_sft_training.ipynb` — SFT Warm-up
+### `1__qwen2_5_sft_training.ipynb` - SFT Warm-up
 Supervised fine-tuning of Qwen2.5-1.5B on NuminaMath-CoT chain-of-thought examples. This stage teaches the model the `<think>...</think>` output format and stabilises generation before RL training begins. Without this step, the base model produces incoherent outputs and GRPO receives near-zero reward signal with no gradient to learn from.
 
 **Key parameters:**
@@ -64,7 +64,7 @@ Supervised fine-tuning of Qwen2.5-1.5B on NuminaMath-CoT chain-of-thought exampl
 
 ---
 
-### `2_grpo_train.ipynb` — GRPO Training
+### `2_grpo_train.ipynb` - GRPO Training
 Implements Group Relative Policy Optimisation using TRL's `GRPOTrainer`. For each prompt, G completions are sampled, scored with a combined reward function, and the policy is updated to favour higher-advantage completions subject to a KL divergence penalty from the SFT checkpoint.
 
 **Reward function:**
@@ -91,12 +91,12 @@ Implements Group Relative Policy Optimisation using TRL's `GRPOTrainer`. For eac
 
 ---
 
-### `3_grpo_test.ipynb` — Checkpoint Evaluation
+### `3_grpo_test.ipynb` - Checkpoint Evaluation
 Loads saved LoRA checkpoints from each GRPO epoch and evaluates accuracy on a 50-sample probe of the GSM8K test set using exact answer match. Run this notebook to reproduce the per-epoch accuracy numbers reported.
 
 ---
 
-### `4_reasoning_quality.ipynb` — Reasoning Quality Analysis
+### `4_reasoning_quality.ipynb` - Reasoning Quality Analysis
 Qualitative comparison of model outputs across the three training stages (baseline, post-SFT, post-GRPO). Loads each checkpoint and generates completions for the same set of GSM8K problems, allowing side-by-side inspection of reasoning quality — structure, arithmetic correctness, constraint application, and use of `<think>` tags.
 
 ---
@@ -113,18 +113,18 @@ pip install datasets==3.1.0
 pip install torch==2.3.0
 ```
 
-Or simply open the notebooks in **Google Colab** — all dependencies are installed in the first cell of each notebook.
+Or simply open the notebooks in **Google Colab** - all dependencies are installed in the first cell of each notebook.
 
 ### Step-by-Step Execution
 
-**Step 1 — SFT Warm-up**
+**Step 1 - SFT Warm-up**
 ```
 Open 1__qwen2_5_sft_training.ipynb in Colab (T4 GPU)
 Run all cells top to bottom
 Checkpoint saved to: /content/sft_output/ (or upload to Drive)
 ```
 
-**Step 2 — GRPO Training**
+**Step 2 - GRPO Training**
 ```
 Open 2_grpo_trai.ipynb in Colab (T4 GPU) or RunPod
 Set config parameters at the top of the notebook (G, max_gen_tokens, kl_beta, lr)
@@ -133,14 +133,14 @@ Run all cells
 Checkpoints saved per epoch
 ```
 
-**Step 3 — Checkpoint Evaluation**
+**Step 3 - Checkpoint Evaluation**
 ```
 Open 3_grpo_test.ipynb
 Point checkpoint_paths to your saved GRPO epoch directories
 Run all cells — outputs per-epoch GSM8K accuracy
 ```
 
-**Step 4 — Reasoning Quality Check**
+**Step 4 - Reasoning Quality Check**
 ```
 Open 4_reasoning_quality.ipynb
 Load baseline, SFT, and GRPO checkpoint paths
@@ -154,7 +154,7 @@ To skip training entirely and reproduce evaluation results, download the checkpo
 
 ## Key Findings
 
-1. **GRPO unlocks reasoning beyond SFT.** Every GRPO configuration surpassed the SFT ceiling of 28% within epoch 1. The 8→28→60% trajectory reflects a phase transition — SFT teaches format, GRPO teaches reasoning.
+1. **GRPO unlocks reasoning beyond SFT.** Every GRPO configuration surpassed the SFT ceiling of 28% within epoch 1. The 8→28→60% trajectory reflects a phase transition - SFT teaches format, GRPO teaches reasoning.
    
 2. **The exploration-stability tradeoff is empirically measurable.** KL=0.01 with G=2 peaks at 60% but collapses at epoch 3 (reward hacking). KL=0.1 with G=4 is stable across all epochs at 52–55%. The right choice depends on whether peak performance or training stability is the priority.
 
